@@ -1,4 +1,4 @@
-package arenahub.api.model;
+package arenahub.api.dto;
 
 public class ReservationRequest {
 }

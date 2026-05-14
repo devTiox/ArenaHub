@@ -1,6 +1,6 @@
 package arenahub.repository;
 
-import arenahub.api.model.Account;
+import arenahub.model.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {

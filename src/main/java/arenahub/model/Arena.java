@@ -1,7 +1,8 @@
-package arenahub.api.model;
+package arenahub.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,27 +19,39 @@ public class Arena {
 
     @Setter
     @Getter
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "owner_account_id", nullable = false)
+    private Account ownerAccount;
+
+    @Setter
+    @Getter
+    @NotBlank
     private String name;
 
     @Setter
     @Getter
     @Email
-    private String email;
+    @NotBlank
+    private String contactEmail;
 
     @Setter
     @Getter
+    @NotBlank
     private String phone;
 
     @Setter
     @Getter
+    @NotBlank
     private String city;
 
     @Setter
     @Getter
+    @NotBlank
     private String address;
 
     @Setter
     @Getter
+    @NotBlank
     private String openHours;
 
     @Setter

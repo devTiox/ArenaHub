@@ -1,7 +1,8 @@
-package arenahub.api.model;
+package arenahub.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,17 +17,26 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Getter
+    @Setter
+    @OneToOne(optional = false)
+    @JoinColumn(name = "account_id", nullable = false, unique = true )
+    private Account account;
+
     @Setter
     @Getter
+    @NotBlank
     private String name;
 
     @Setter
     @Getter
     @Email
-    private String email;
+    @NotBlank
+    private String contactEmail;
 
     @Setter
     @Getter
+    @NotBlank
     private String phone;
 
     @Setter

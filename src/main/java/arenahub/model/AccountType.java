@@ -1,7 +1,7 @@
-package arenahub.api.model;
+package arenahub.model;
 
 public enum AccountType {
     CLIENT,
-    ARENA,
+    ARENA_OWNER,
     ADMIN
 }
