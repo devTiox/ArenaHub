@@ -5,36 +5,38 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@NoArgsConstructor
 @Entity
+@Getter
+@Setter
 public class Account {
 
-    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Setter
-    @Getter
-    private boolean active = true;
+    private boolean active;
 
-    @Setter
-    @Getter
     @Email
     @Column(unique = true)
     @NotBlank
     private String email;
 
-    @Setter
-    @Getter
     @NotBlank
     private String passwordHash;
 
-    @Setter
-    @Getter
     @Enumerated(EnumType.STRING)
     @NotNull
     private AccountType type;
+
+    public Account(String email, String passwordHash, AccountType type) {
+        this.email = email;
+        this.passwordHash = passwordHash;
+        this.type = type;
+        this.active = true;
+    }
 
 }
