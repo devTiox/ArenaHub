@@ -1,5 +1,6 @@
 package arenahub.api.controller;
 
+import arenahub.api.dto.request.AccountRequest;
 import arenahub.api.dto.request.ClientRequest;
 import arenahub.api.dto.response.ClientResponse;
 import arenahub.service.ClientService;
@@ -16,18 +17,23 @@ public class ClientController {
 
     private final ClientService clientService;
 
-    @GetMapping("/clients")
+    @GetMapping("/client/all")
     public List<ClientResponse> getClients(){
         return clientService.getAll();
     }
 
-    @PostMapping("/clients")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ClientResponse addClient(@RequestBody ClientRequest request){
-        return clientService.addClient(request);
+    @PostMapping("/login/client")
+    public ClientResponse loginClient(@RequestBody AccountRequest account){
+        return ClientResponse.from(clientService.findByAccount(account));
     }
 
-    @DeleteMapping("/clients/{clientId}")
+    @PostMapping("/register/client")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ClientResponse registerClient(@RequestBody ClientRequest client){
+        return clientService.registerClient(client, client.getAccount());
+    }
+
+    @DeleteMapping("/client/{clientId}")
     public ResponseEntity<Void> deleteClient(@PathVariable Long clientId){
         clientService.deleteClient(clientId);
         return ResponseEntity.noContent().build();

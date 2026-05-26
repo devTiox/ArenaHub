@@ -16,12 +16,19 @@ public class AccountController {
 
     private final AccountService accountService;
 
-    @GetMapping("/accounts")
+    @GetMapping("/account")
     public List<AccountResponse> getAccounts() {
         return accountService.getAll();
     }
 
-    @DeleteMapping("/accounts/{accountId}")
+
+    @PostMapping("/register")
+    @ResponseStatus(HttpStatus.CREATED)
+    public AccountResponse registerAccount(@RequestBody AccountRequest request){
+        return AccountResponse.from(accountService.registerAccount(request));
+    }
+
+    @DeleteMapping("/account/{accountId}")
     public ResponseEntity<Void> deleteAccount(@PathVariable Long accountId){
         accountService.deleteAccount(accountId);
         return ResponseEntity.noContent().build();

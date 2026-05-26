@@ -1,5 +1,6 @@
 package arenahub.service;
 
+import arenahub.api.dto.request.AccountRequest;
 import arenahub.api.dto.request.ClientRequest;
 import arenahub.api.dto.response.ClientResponse;
 import arenahub.model.Account;
@@ -25,10 +26,15 @@ public class ClientService {
     private final AccountRepository accountRepository;
     private final AccountService accountService;
 
-    public ClientResponse addClient(ClientRequest client) {
-        Account account = accountService.createAccount(client.getAccount());
-        Client savedClient = clientRepository.save(toClient(client, account));
-        return ClientResponse.from(savedClient);
+    public Client findByAccount(AccountRequest account) {
+        Account authenticatedAccount = accountService.authAccount(account);
+
+        if (!authenticatedAccount.isActive()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account is inactive");
+        }
+
+        return clientRepository.findByAccount_Id(authenticatedAccount.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Client not found"));
     }
 
     public List<ClientResponse> getAll() {
@@ -36,6 +42,11 @@ public class ClientService {
                 .stream()
                 .map(ClientResponse::from)
                 .collect(Collectors.toList());
+    }
+
+    public ClientResponse registerClient(ClientRequest client, AccountRequest accountRequest) {
+        Account account = accountService.registerAccount(accountRequest);
+        return ClientResponse.from(clientRepository.save(toClient(client, account)));
     }
 
     public boolean existsById(Long clientId) {

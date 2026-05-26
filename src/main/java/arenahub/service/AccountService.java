@@ -25,7 +25,19 @@ public class AccountService {
     private final PasswordEncoder passwordEncoder;
 
 
-    public Account createAccount(AccountRequest account){
+    public Account authAccount(AccountRequest request) {
+        Account account = accountRepository.findAccountByEmail(request.getEmail())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Account not found"
+                ));
+
+        if(passwordEncoder.matches(request.getPassword(), account.getPasswordHash()))
+            return account;
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication failed");
+    }
+
+    public Account registerAccount(AccountRequest account){
         if(accountRepository.existsByEmail(account.getEmail())){
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Account email already exists");
         }
@@ -34,11 +46,7 @@ public class AccountService {
         return accountRepository.save(toAccount(account));
     }
 
-    public AccountResponse createAccountResponse(AccountRequest account) {
-        return AccountResponse.from(createAccount(account));
-    }
-
-    public void updateAccount(AccountRequest request, Long id){
+    public AccountResponse updateAccount(AccountRequest request, Long id){
         Account account = accountRepository.findById(id).orElseThrow();
         if(!request.getPassword().isBlank()) {
             account.setPasswordHash(passwordEncoder.encode(request.getPassword()));
@@ -46,15 +54,7 @@ public class AccountService {
         if(!request.getEmail().isBlank()){
             account.setEmail(request.getEmail());
         }
-        accountRepository.save(account);
-    }
-
-    private Account toAccount(AccountRequest accountRequest){
-        return new Account(
-                accountRequest.getEmail(),
-                accountRequest.getPassword(),
-                accountRequest.getAccountType()
-        );
+        return createAccountResponse(accountRepository.save(account));
     }
 
     @Transactional
@@ -70,11 +70,23 @@ public class AccountService {
         accountRepository.deleteById(accountId);
     }
 
-
     public List<AccountResponse> getAll() {
         return accountRepository.findAll()
                 .stream()
                 .map(AccountResponse::from)
                 .collect(Collectors.toList());
     }
+
+    public AccountResponse createAccountResponse(Account account) {
+        return AccountResponse.from(account);
+    }
+
+    public Account toAccount(AccountRequest accountRequest){
+        return new Account(
+                accountRequest.getEmail(),
+                accountRequest.getPassword(),
+                accountRequest.getAccountType()
+        );
+    }
+
 }

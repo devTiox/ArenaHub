@@ -12,6 +12,7 @@ import lombok.Setter;
 @Setter
 public class AccountRequest {
 
+    private Long id;
     private String email;
     private String password;
     private AccountType accountType;
