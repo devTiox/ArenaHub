@@ -2,8 +2,10 @@ package arenahub.service;
 
 import arenahub.api.dto.request.AccountRequest;
 import arenahub.api.dto.request.ClientRequest;
+import arenahub.api.dto.request.RegisterRequest;
 import arenahub.api.dto.response.ClientResponse;
 import arenahub.model.Account;
+import arenahub.model.AccountType;
 import arenahub.model.Client;
 import arenahub.repository.AccountRepository;
 import arenahub.repository.ClientRepository;
@@ -44,9 +46,11 @@ public class ClientService {
                 .collect(Collectors.toList());
     }
 
-    public ClientResponse registerClient(ClientRequest client, AccountRequest accountRequest) {
+    public ClientResponse registerClient(RegisterRequest request) {
+        AccountRequest accountRequest = new AccountRequest(null, request.email(), request.password(), AccountType.CLIENT);
+        ClientRequest clientRequest = new ClientRequest(null, null, request.contactEmail(), request.name(), request.phone());
         Account account = accountService.registerAccount(accountRequest);
-        return ClientResponse.from(clientRepository.save(toClient(client, account)));
+        return ClientResponse.from(clientRepository.save(toClient(clientRequest, account)));
     }
 
     public boolean existsById(Long clientId) {
@@ -56,9 +60,9 @@ public class ClientService {
     private Client toClient(ClientRequest request, Account account){
         return new Client(
                 account,
-                request.getName(),
-                request.getContactEmail(),
-                request.getPhone()
+                request.name(),
+                request.contactEmail(),
+                request.phone()
         );
     }
 

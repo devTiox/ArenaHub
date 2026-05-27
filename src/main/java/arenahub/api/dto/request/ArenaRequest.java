@@ -1,4 +1,4 @@
 package arenahub.api.dto.request;
 
-public class ArenaRequest {
+public record ArenaRequest() {
 }

@@ -1,4 +1,4 @@
 package arenahub.api.dto.request;
 
-public class ReservationRequest {
+public record ReservationRequest() {
 }

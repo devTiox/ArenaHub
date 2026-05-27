@@ -1,20 +1,11 @@
 package arenahub.api.dto.request;
 
 import arenahub.model.AccountType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
-public class AccountRequest {
-
-    private Long id;
-    private String email;
-    private String password;
-    private AccountType accountType;
-
+public record AccountRequest(
+        Long id,
+        String email,
+        String password,
+        AccountType accountType
+) {
 }

@@ -1,7 +1,6 @@
 package arenahub.api.controller;
 
-import arenahub.api.dto.request.AccountRequest;
-import arenahub.api.dto.request.ClientRequest;
+import arenahub.api.dto.request.RegisterRequest;
 import arenahub.api.dto.response.ClientResponse;
 import arenahub.service.ClientService;
 import lombok.AllArgsConstructor;
@@ -22,15 +21,10 @@ public class ClientController {
         return clientService.getAll();
     }
 
-    @PostMapping("/login/client")
-    public ClientResponse loginClient(@RequestBody AccountRequest account){
-        return ClientResponse.from(clientService.findByAccount(account));
-    }
-
     @PostMapping("/register/client")
     @ResponseStatus(HttpStatus.CREATED)
-    public ClientResponse registerClient(@RequestBody ClientRequest client){
-        return clientService.registerClient(client, client.getAccount());
+    public ClientResponse registerClient(@RequestBody RegisterRequest client){
+        return clientService.registerClient(client);
     }
 
     @DeleteMapping("/client/{clientId}")

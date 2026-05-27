@@ -26,43 +26,42 @@ public class AccountService {
 
 
     public Account authAccount(AccountRequest request) {
-        Account account = accountRepository.findAccountByEmail(request.getEmail())
+        Account account = accountRepository.findAccountByEmail(request.email())
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Account not found"
                 ));
 
-        if(passwordEncoder.matches(request.getPassword(), account.getPasswordHash()))
+        if(passwordEncoder.matches(request.password(), account.getPasswordHash()))
             return account;
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication failed");
     }
 
     public Account registerAccount(AccountRequest account){
-        if(accountRepository.existsByEmail(account.getEmail())){
+        if(accountRepository.existsByEmail(account.email())){
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Account email already exists");
         }
 
-        account.setPassword(passwordEncoder.encode(account.getPassword()));
         return accountRepository.save(toAccount(account));
     }
 
     public AccountResponse updateAccount(AccountRequest request, Long id){
         Account account = accountRepository.findById(id).orElseThrow();
-        if(!request.getPassword().isBlank()) {
-            account.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        if(!request.password().isBlank()) {
+            account.setPasswordHash(passwordEncoder.encode(request.password()));
         }
-        if(!request.getEmail().isBlank()){
-            account.setEmail(request.getEmail());
+        if(!request.email().isBlank()){
+            account.setEmail(request.email());
         }
         return createAccountResponse(accountRepository.save(account));
     }
 
+    //TODO: ADD TRANSACTIONAL DELETE FOR OWNER
     @Transactional
     public void deleteAccount(Long accountId) {
         if(!accountRepository.existsById(accountId)){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found");
         }
-
         clientRepository.findByAccount_Id(accountId).ifPresent(client -> {
             reservationRepository.deleteByClient_Id(client.getId());
             clientRepository.delete(client);
@@ -83,9 +82,9 @@ public class AccountService {
 
     public Account toAccount(AccountRequest accountRequest){
         return new Account(
-                accountRequest.getEmail(),
-                accountRequest.getPassword(),
-                accountRequest.getAccountType()
+                accountRequest.email(),
+                passwordEncoder.encode(accountRequest.password()),
+                accountRequest.accountType()
         );
     }
 
