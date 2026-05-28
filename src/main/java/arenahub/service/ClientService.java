@@ -90,4 +90,9 @@ public class ClientService {
                         }
                 );
     }
+
+    public ClientResponse getClientByAccount_Id(Long accountId) {
+        return ClientResponse.from(clientRepository.findByAccount_Id(accountId)
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Client not found")));
+    }
 }

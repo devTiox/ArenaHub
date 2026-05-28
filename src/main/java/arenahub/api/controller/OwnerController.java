@@ -2,9 +2,12 @@ package arenahub.api.controller;
 
 import arenahub.api.dto.request.RegisterRequest;
 import arenahub.api.dto.response.OwnerResponse;
+import arenahub.model.CustomUserDetails;
 import arenahub.service.OwnerService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,15 +23,14 @@ public class OwnerController {
         return ownerService.getAll();
     }
 
-    @PostMapping("/register/owner")
-    @ResponseStatus(HttpStatus.CREATED)
-    public OwnerResponse registerClient(@RequestBody RegisterRequest client){
-        return ownerService.registerOwner(client);
+    @GetMapping("/owner/me")
+    public OwnerResponse getOwner(@AuthenticationPrincipal CustomUserDetails user){
+        return ownerService.getOwnerByAccount_Id(user.getId());
     }
 
-//    @DeleteMapping("/owner/{ownerId}")
-//    public ResponseEntity<Void> deleteClient(@PathVariable Long ownerId){
-//        ownerService.deleteOwner(ownerId);
-//        return ResponseEntity.noContent().build();
-//    }
+    @PostMapping("/register/owner")
+    @ResponseStatus(HttpStatus.CREATED)
+    public OwnerResponse registerClient(@Valid @RequestBody RegisterRequest client){
+        return ownerService.registerOwner(client);
+    }
 }

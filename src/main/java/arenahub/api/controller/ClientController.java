@@ -2,10 +2,12 @@ package arenahub.api.controller;
 
 import arenahub.api.dto.request.RegisterRequest;
 import arenahub.api.dto.response.ClientResponse;
+import arenahub.model.CustomUserDetails;
 import arenahub.service.ClientService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,15 +23,14 @@ public class ClientController {
         return clientService.getAll();
     }
 
-    @PostMapping("/register/client")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ClientResponse registerClient(@RequestBody RegisterRequest client){
-        return clientService.registerClient(client);
+    @GetMapping("/client/me")
+    public ClientResponse getClient(@AuthenticationPrincipal CustomUserDetails user){
+        return clientService.getClientByAccount_Id(user.getId());
     }
 
-    @DeleteMapping("/client/{clientId}")
-    public ResponseEntity<Void> deleteClient(@PathVariable Long clientId){
-        clientService.deleteClient(clientId);
-        return ResponseEntity.noContent().build();
+    @PostMapping("/register/client")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ClientResponse registerClient(@Valid @RequestBody RegisterRequest client){
+        return clientService.registerClient(client);
     }
 }

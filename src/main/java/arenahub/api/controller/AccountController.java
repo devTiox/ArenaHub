@@ -6,11 +6,13 @@ import arenahub.api.dto.response.AuthResponse;
 import arenahub.config.JwtService;
 import arenahub.model.CustomUserDetails;
 import arenahub.service.AccountService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,13 +25,13 @@ public class AccountController {
     private final AccountService accountService;
     private final JwtService jwtService;
 
-    @GetMapping("/account")
+    @GetMapping("/account/all")
     public List<AccountResponse> getAccounts() {
         return accountService.getAll();
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody LoginRequest request){
+    public AuthResponse login(@Valid @RequestBody LoginRequest request){
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.email(),
@@ -43,9 +45,9 @@ public class AccountController {
         return new AuthResponse(token);
     }
 
-    @DeleteMapping("/account/{accountId}")
-    public ResponseEntity<Void> deleteAccount(@PathVariable Long accountId){
-        accountService.deleteAccount(accountId);
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> deleteAccount(@AuthenticationPrincipal CustomUserDetails user){
+        accountService.deleteAccount(user.getId());
         return ResponseEntity.noContent().build();
     }
 }

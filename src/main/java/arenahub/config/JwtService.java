@@ -1,10 +1,10 @@
 package arenahub.config;
 
 import arenahub.model.CustomUserDetails;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -20,8 +20,7 @@ public class JwtService {
     }
     public String generateToken(CustomUserDetails user){
         return Jwts.builder()
-                .subject(user.getUsername())
-                .claim("accountId", user.getId())
+                .subject(user.getId().toString())
                 .claim("accountType", user.getType())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis()+1000*60*60*24))
@@ -29,18 +28,20 @@ public class JwtService {
                 .compact();
     }
 
-    public String extractUsername(String token) {
-        return Jwts.parser()
-                .verifyWith(secretKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getSubject();
+    public Long extractAccountId(String token) {
+        Claims claims = extractClaims(token);
+        String subject = claims.getSubject();
+
+        if (subject != null) {
+            return Long.parseLong(subject);
+        }
+
+        return null;
     }
 
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        String username = extractUsername(token);
-        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+    public boolean isTokenValid(String token, CustomUserDetails userDetails) {
+        Long accountId = extractAccountId(token);
+        return accountId.equals(userDetails.getId()) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {
@@ -48,11 +49,14 @@ public class JwtService {
     }
 
     private Date extractExpiration(String token) {
+        return extractClaims(token).getExpiration();
+    }
+
+    private Claims extractClaims(String token) {
         return Jwts.parser()
                 .verifyWith(secretKey)
                 .build()
                 .parseSignedClaims(token)
-                .getPayload()
-                .getExpiration();
+                .getPayload();
     }
 }

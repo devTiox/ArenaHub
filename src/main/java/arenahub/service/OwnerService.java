@@ -9,7 +9,9 @@ import arenahub.model.AccountType;
 import arenahub.model.Owner;
 import arenahub.repository.OwnerRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,5 +46,10 @@ public class OwnerService {
                 owner.contactEmail(),
                 List.of()
         );
+    }
+
+    public OwnerResponse getOwnerByAccount_Id(Long id) {
+        return OwnerResponse.from(ownerRepository.findByAccount_Id(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Owner not found")));
     }
 }

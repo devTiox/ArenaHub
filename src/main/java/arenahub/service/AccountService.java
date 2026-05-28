@@ -3,9 +3,8 @@ package arenahub.service;
 import arenahub.api.dto.request.AccountRequest;
 import arenahub.api.dto.response.AccountResponse;
 import arenahub.model.Account;
-import arenahub.repository.AccountRepository;
-import arenahub.repository.ClientRepository;
-import arenahub.repository.ReservationRepository;
+import arenahub.model.AccountType;
+import arenahub.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,14 +22,13 @@ public class AccountService {
     private final ClientRepository clientRepository;
     private final ReservationRepository reservationRepository;
     private final PasswordEncoder passwordEncoder;
+    private final OwnerRepository ownerRepository;
+    private final ArenaService arenaService;
 
 
     public Account authAccount(AccountRequest request) {
         Account account = accountRepository.findAccountByEmail(request.email())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Account not found"
-                ));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found"));
 
         if(passwordEncoder.matches(request.password(), account.getPasswordHash()))
             return account;
@@ -46,7 +44,7 @@ public class AccountService {
     }
 
     public AccountResponse updateAccount(AccountRequest request, Long id){
-        Account account = accountRepository.findById(id).orElseThrow();
+        Account account = accountRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found"));
         if(!request.password().isBlank()) {
             account.setPasswordHash(passwordEncoder.encode(request.password()));
         }
@@ -56,16 +54,20 @@ public class AccountService {
         return createAccountResponse(accountRepository.save(account));
     }
 
-    //TODO: ADD TRANSACTIONAL DELETE FOR OWNER
     @Transactional
     public void deleteAccount(Long accountId) {
-        if(!accountRepository.existsById(accountId)){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found");
+        Account account = accountRepository.findById(accountId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found"));
+        switch (account.getType()){
+            case AccountType.CLIENT -> clientRepository.findByAccount_Id(accountId).ifPresent(client -> {
+                reservationRepository.deleteByClient_Id(client.getId());
+                clientRepository.delete(client);
+            });
+            case AccountType.ARENA_OWNER -> ownerRepository.findByAccount_Id(accountId).ifPresent(owner -> {
+                arenaService.deleteByOwner(owner);
+                ownerRepository.delete(owner);
+            });
         }
-        clientRepository.findByAccount_Id(accountId).ifPresent(client -> {
-            reservationRepository.deleteByClient_Id(client.getId());
-            clientRepository.delete(client);
-        });
+
         accountRepository.deleteById(accountId);
     }
 
