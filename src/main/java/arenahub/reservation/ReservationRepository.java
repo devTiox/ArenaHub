@@ -1,0 +1,8 @@
+package arenahub.reservation;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+    void deleteByClient_Id(Long clientId);
+    void deleteByArena_Id(Long arenaId);
+}

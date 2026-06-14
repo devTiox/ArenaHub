@@ -1,0 +1,13 @@
+package arenahub.arena;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface ArenaRepository extends JpaRepository<Arena, Long> {
+    List<Arena> findByOwner_Account_Id(Long accountId);
+
+    void deleteByOwner_Id(Long id);
+
+    List<Arena> findByOwner_Id(Long id);
+}
